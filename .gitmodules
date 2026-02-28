@@ -1,0 +1,9 @@
+[submodule "Server"]
+	path = Server
+	url = https://github.com/EQEmu/Server.git
+[submodule "Maps"]
+	path = Maps
+	url = https://github.com/EQEmu/maps.git
+[submodule "Quests"]
+	path = Quests
+	url = https://github.com/ProjectEQ/projecteqquests.git

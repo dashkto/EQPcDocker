@@ -1,0 +1,94 @@
+x-base-service: &base-service
+  build:
+    context: .
+    dockerfile: containers/eqemu-server/Dockerfile
+  environment: &base-environment
+    DATABASE_USER: ${DATABASE_USER:-eq}
+    DATABASE_PASSWORD: ${DATABASE_PASSWORD:-eq}
+    DATABASE_NAME: ${DATABASE_NAME:-eq}
+    SERVER_ADDRESS: ${SERVER_ADDRESS}
+    SERVER_SHORT_NAME: ${SERVER_SHORT_NAME:-EQPcDocker}
+    SERVER_LONG_NAME: ${SERVER_LONG_NAME:-EQPcDocker}
+    WAIT_HOSTS: db:3306
+
+services:
+  shared:
+    <<: *base-service
+    command: /app/shared_memory
+    volumes:
+      - shared:/app/shared
+    depends_on:
+      - db
+
+  login:
+    <<: *base-service
+    command: /app/loginserver
+    ports:
+      - 5998:5998/tcp
+      - 5998:5998/udp
+      - 5999:5999/tcp
+      - 5999:5999/udp
+      - 6000:6000/tcp
+      - 6000:6000/udp
+    depends_on:
+      - db
+
+  world:
+    <<: *base-service
+    command: /app/world
+    environment:
+      <<: *base-environment
+      WAIT_PATHS: /app/shared/base_data
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+    volumes:
+      - shared:/app/shared
+    depends_on:
+      - db
+      - shared
+
+  zone:
+    <<: *base-service
+    command: ['/app/eqlaunch', 'dynzone1']
+    ports:
+      - 7000-7400:7000-7400/tcp
+      - 7000-7400:7000-7400/udp
+    volumes:
+      - shared:/app/shared
+    depends_on:
+      - db
+      - world
+
+  queryserv:
+    <<: *base-service
+    command: /app/queryserv
+    depends_on:
+      - db
+      - world
+
+  ucs:
+    <<: *base-service
+    command: /app/ucs
+    ports:
+      - 7778:7778/tcp
+      - 7778:7778/udp
+    depends_on:
+      - db
+      - world
+
+  db:
+    build:
+      context: .
+      dockerfile: containers/database/Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-eq}
+      MYSQL_USER: ${DATABASE_USER:-eq}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD:-eq}
+      MYSQL_DATABASE: ${DATABASE_NAME:-eq}
+    volumes:
+      - database:/var/lib/mysql
+
+volumes:
+  shared:
+  database:
