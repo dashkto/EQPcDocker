@@ -3,36 +3,43 @@ FROM debian:12-slim AS builder
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update && apt install -y \
+    autoconf \
+    automake \
     bash \
     build-essential \
     cmake \
-    cpp \
-    debconf-utils \
-    g++ \
-    gcc \
+    curl \
     git \
-    libboost-dev \
-    libcurl4-openssl-dev \
-    liblua5.1-dev \
-    libluajit-5.1-dev \
-    libmariadb-dev \
-    libsodium-dev \
-    libssl-dev \
-    libuv1-dev \
-    lua5.1 \
-    lua-bitop \
-    make \
-    mariadb-client \
+    libperl-dev \
+    libtool \
+    linux-libc-dev \
+    ninja-build \
     pkg-config \
-    uuid-dev
+    tar \
+    unzip \
+    uuid-dev \
+    zip
 
 ADD Server /source
 WORKDIR /source
 
-RUN mkdir -p build && \
-    cd build && \
-    cmake -G 'Unix Makefiles' -DEQEMU_BUILD_LOGIN=ON .. && \
-    make -j $(nproc)
+# Submodules aren't preserved by ADD, so clone them at their pinned commits
+RUN git clone https://github.com/microsoft/vcpkg.git submodules/vcpkg && \
+    cd submodules/vcpkg && \
+    git checkout d1ff36c6520ee43f1a656c03cd6425c2974a449e && \
+    ./bootstrap-vcpkg.sh
+
+RUN git clone https://github.com/zaphoyd/websocketpp.git submodules/websocketpp && \
+    cd submodules/websocketpp && \
+    git checkout b9aeec6eaf3d5610503439b4fae3581d9aff08e8
+
+RUN cmake -S . -B build -G Ninja \
+      -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+      -DEQEMU_BUILD_LOGIN=ON \
+      -DEQEMU_BUILD_LUA=ON \
+      -DEQEMU_BUILD_PERL=ON \
+      -DEQEMU_BUILD_CLIENT_FILES=ON && \
+    cmake --build build --parallel 1
 
 FROM debian:12-slim
 
@@ -40,16 +47,10 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update && apt install -y \
     bash \
-    gdb \
     gettext-base \
-    git \
-    liblua5.1-0 \
-    libluajit-5.1-2 \
-    libuv1 \
-    lua5.1 \
-    lua-bitop \
-    mariadb-client \
-    nano
+    libperl5.36 \
+    mariadb-client && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/logs
 RUN mkdir -p /app/shared

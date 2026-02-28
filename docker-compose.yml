@@ -1,4 +1,5 @@
 x-base-service: &base-service
+  image: eqpcdocker-server
   build:
     context: .
     dockerfile: containers/eqemu-server/Dockerfile
@@ -10,6 +11,7 @@ x-base-service: &base-service
     SERVER_SHORT_NAME: ${SERVER_SHORT_NAME:-EQPcDocker}
     SERVER_LONG_NAME: ${SERVER_LONG_NAME:-EQPcDocker}
     WAIT_HOSTS: db:3306
+    WAIT_HOSTS_TIMEOUT: 300
 
 services:
   shared:
@@ -38,7 +40,7 @@ services:
     command: /app/world
     environment:
       <<: *base-environment
-      WAIT_PATHS: /app/shared/base_data
+      WAIT_PATHS: /app/shared/spells
     ports:
       - 9000:9000/tcp
       - 9000:9000/udp

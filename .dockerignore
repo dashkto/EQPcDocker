@@ -1,0 +1,9 @@
+**/.git
+**/.github
+**/.gitignore
+**/.idea
+**/node_modules
+*.md
+LICENSE
+.env
+.env.example
