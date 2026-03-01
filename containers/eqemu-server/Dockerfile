@@ -65,6 +65,10 @@ ADD Server/utils/patches/*.conf /app/
 
 ADD Maps /app/Maps
 ADD Quests /app/quests
+# Zone binary's CheckForCompatibleQuestPlugins() hardcodes {server_path}/lua_modules
+# and {server_path}/plugins — symlink from the quests subdirectories.
+RUN ln -s /app/quests/lua_modules /app/lua_modules && \
+    ln -s /app/quests/plugins /app/plugins
 
 ADD containers/eqemu-server/login.template.json /app/
 ADD containers/eqemu-server/eqemu_config.template.json /app/

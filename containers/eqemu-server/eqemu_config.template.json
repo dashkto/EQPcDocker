@@ -30,7 +30,7 @@
         "host": "login"
       },
       "tcp": {
-        "host": "world",
+        "ip": "${WORLD_TCP_IP}",
         "port": "9000"
       },
       "key": "somelongrandomstring12345asdfffff",
@@ -45,6 +45,11 @@
       "port": "3306",
       "username": "${DATABASE_USER}",
       "password": "${DATABASE_PASSWORD}"
+    },
+    "directories": {
+      "quests": "quests/",
+      "plugins": "quests/plugins/",
+      "lua_modules": "quests/lua_modules/"
     },
     "launcher": {
       "exe": "/app/zone"

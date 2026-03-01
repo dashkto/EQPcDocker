@@ -92,6 +92,12 @@ The server Dockerfile compiles mainline [EQEmu/Server](https://github.com/EQEmu/
 - **SSL errors during DB download**: The PEQ database is downloaded from `db.eqemu.dev` over HTTPS. If you're behind a corporate proxy with SSL inspection, the download uses `curl -k` to bypass certificate verification.
 - **Services keep restarting**: Check `docker compose logs <service>` — most issues are database connectivity. The services use [docker-compose-wait](https://github.com/ufoscout/docker-compose-wait) to wait for MariaDB, with a 300-second timeout for the first run.
 - **World waiting for shared memory**: The `world` service waits for `/app/shared/spells` to exist (created by `shared_memory`). If `shared` exited with code 0, this file should be in the shared volume.
+- **Zone processes crash with "Incompatible quest plugins"**: The zone binary requires `CheckHandin` to exist in both `/app/lua_modules/` and `/app/plugins/`. The Dockerfile creates symlinks from the Quests submodule directories. If you see this error, make sure the Quests submodule was cloned (`git submodule update --init`).
+- **No zone servers available / OP_ZoneUnavail**: Check that the `launcher` table in the database has an entry matching the eqlaunch command. The default is `dynzone1` with 5 dynamic zones:
+  ```sql
+  INSERT INTO launcher (name, dynamics) VALUES ('dynzone1', 5);
+  ```
+- **eqlaunch not connecting to world**: The zone container uses `WORLD_TCP_IP=world` to connect to the world container's TCP port. The EQEmu config key is `server.world.tcp.ip` (not `host`). If zones aren't spawning, check `docker compose logs world` for "New Launcher connection" messages.
 
 ## Credits
 

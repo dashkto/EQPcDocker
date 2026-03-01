@@ -10,6 +10,7 @@ x-base-service: &base-service
     SERVER_ADDRESS: ${SERVER_ADDRESS}
     SERVER_SHORT_NAME: ${SERVER_SHORT_NAME:-EQPcDocker}
     SERVER_LONG_NAME: ${SERVER_LONG_NAME:-EQPcDocker}
+    WORLD_TCP_IP: "0.0.0.0"
     WAIT_HOSTS: db:3306
     WAIT_HOSTS_TIMEOUT: 300
 
@@ -53,6 +54,9 @@ services:
   zone:
     <<: *base-service
     command: ['/app/eqlaunch', 'dynzone1']
+    environment:
+      <<: *base-environment
+      WORLD_TCP_IP: world
     ports:
       - 7000-7400:7000-7400/tcp
       - 7000-7400:7000-7400/udp

@@ -26,10 +26,10 @@
     "allow_token_login": false
   },
   "logging": {
-    "trace": false,
-    "world_trace": false,
-    "dump_packets_in": false,
-    "dump_packets_out": false
+    "trace": true,
+    "world_trace": true,
+    "dump_packets_in": true,
+    "dump_packets_out": true
   },
   "client_configuration": {
     "titanium_port": 5998,
